@@ -1,0 +1,33 @@
+# --- Pliki binarne i kompilowane ---
+*.class
+*.log
+*.ctxt
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+# Foldery z plikami kompilowanymi
+bin/
+# Alternatywne nazwy folderów z plikami kompilowanymi
+target/
+build/
+out/
+.gradle/
+
+# --- Pliki i foldery IDE ---
+.vscode/
+*.code-workspace
+
+# --- Pliki systemowe (Mac/Windows) ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- Pliki konfiguracyjne Eclipse (używane przez wtyczkę Java w VS Code) ---
+.classpath
+.project
+.settings/
+.factorypath
