@@ -9,7 +9,7 @@ public class Warship implements ShipComponent {
 
     }
 
-    public void addMast(ShipComponent component) {
+    public void addComponent(ShipComponent component) {
         this.components.add(component);
     }
 
@@ -37,6 +37,7 @@ public class Warship implements ShipComponent {
         for (ShipComponent comp : components) {
             if (comp.containsCoordinate(c)) {
                 comp.registerHit(c);
+                return;
             }
         }
     }

@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class Coordinate {
     private int x;
     private int y;
@@ -24,7 +26,7 @@ public class Coordinate {
 
     @Override
     public int hashCode() {
-        return 31 * x + y;
+        return Objects.hash(x, y);
     }
 
     @Override

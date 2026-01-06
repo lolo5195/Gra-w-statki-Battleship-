@@ -2,8 +2,8 @@ import java.util.List;
 
 public interface ShipComponent {
     
-    public void hit();
-    public boolean isSunk();
+    void hit();
+    boolean isSunk();
 
     List<Coordinate> getCoordinates();
     boolean containsCoordinate(Coordinate c);
