@@ -11,7 +11,7 @@ public class Board {
             Arrays.fill(grid[i], '~');
         }
         ships = new ArrayList<>();
-        observers = new ArrayList<>();
+        this.observers = new ArrayList<>();
     }
 
     public char[][] getGrid() {
@@ -29,10 +29,14 @@ public class Board {
     }
 
     public void attach(Observer observer) {
-        // TODO: Osoba 4 (dodawanie obserwatora)
+        if (observer != null && !observers.contains(observer)) {
+        observers.add(observer);
+    }
     }
 
     public void notifyObservers() {
-        // TODO: Osoba 4 (powiadamianie obserwatorów)
+        for(Observer observer : observers) {
+            observer.update(this);
+        }
     }
 }
