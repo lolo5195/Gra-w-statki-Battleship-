@@ -1,21 +1,33 @@
-import java.io.*;
 import java.util.Stack;
 
 public class GameEngine {
     private static GameEngine instance;
-    private Board board;
+    private Board playerBoard;
+    private Board botBoard;
     private Player player1;
     private Player player2;
     private boolean isRunning;
     private Stack<Command> undoStack;
     private Stack<Command> redoStack;
 
+    // Pobranie planszy gracza
+    public Board getPlayerBoard() {
+        return playerBoard;
+    }
+
+    // Pobranie planszy bota
+    public Board getBotBoard() {
+        return botBoard;
+    }
+
+    // Konstruktor prywatny (singleton)
     private GameEngine() {
         undoStack = new Stack<>();
         redoStack = new Stack<>();
         isRunning = false;
     }
 
+    // Singleton
     public static GameEngine getInstance() {
         if (instance == null) {
             instance = new GameEngine();
@@ -23,36 +35,62 @@ public class GameEngine {
         return instance;
     }
 
+    // Przygotowanie gry
     public void setupGame() {
-        BoardBuilder builder = new BoardBuilder();
-        board = builder.addShips().build(); // Budowa planszy
+        // Budowanie plansz
+        playerBoard = new BoardBuilder().addPlayerShips().build();
+        botBoard = new BoardBuilder().addBotShips(5).build();
+
+        // Tworzymy graczy
         player1 = new HumanPlayer("Player1");
-        player2 = new BotPlayer(1); // Bot z poziomem trudności
+        player2 = new BotPlayer(1);
+
+        // Ustawienie planszy przeciwnika
+        player1.setEnemyBoard(botBoard);
+        player2.setEnemyBoard(playerBoard);
+
         System.out.println("Game setup completed.");
     }
 
-    public void startGame() {
-        System.out.println("Game started!");
+    // Rozpoczęcie gry
+    public Player startGame() {
+        System.out.println("\nGame started!");
         isRunning = true;
-        while (!board.isGameOver() && isRunning) {
-            processTurn(player1);
-            if (!board.isGameOver()) {
-                processTurn(player2);
+
+        while (!playerBoard.isGameOver() && !botBoard.isGameOver() && isRunning) {
+            processTurn(player1, botBoard);
+            if (!botBoard.isGameOver() && isRunning) {
+                processTurn(player2, playerBoard);
             }
         }
+
         isRunning = false;
-        System.out.println("Game Over!");
+
+        if (playerBoard.isGameOver()) {
+            System.out.println("Bot wins!");
+            return player2;
+        } else if (botBoard.isGameOver()) {
+            System.out.println(player1.getName() + " wins!");
+            return player1;
+        } else {
+            System.out.println("Game stopped.");
+            return null;
+        }
     }
 
-    private void processTurn(Player player) {
-        System.out.println(player.getName() + "'s turn.");
+    // Wykonanie tury gracza
+    private void processTurn(Player player, Board targetBoard) {
+        System.out.println("\n" + player.getName() + "'s turn.");
         Coordinate move = player.getMove();
-        Command fire = new FireCommand(board, move);
-        undoStack.push(fire); // Zapis komendy w historii
-        fire.execute(); // Wykonanie komendy strzału
-        board.notifyObservers();
+
+        // Utworzenie komendy FireCommand
+        Command fire = new FireCommand(targetBoard, move);
+        undoStack.push(fire); // dodanie do stosu undo
+        fire.execute();        // wykonanie strzału
+        targetBoard.notifyObservers(); // powiadomienie obserwatorów (np. ConsoleView)
     }
 
+    // Cofnięcie ostatniego ruchu
     public void undoLastMove() {
         if (!undoStack.isEmpty()) {
             Command command = undoStack.pop();
@@ -64,6 +102,7 @@ public class GameEngine {
         }
     }
 
+    // Powtórzenie cofniętego ruchu
     public void redoLastMove() {
         if (!redoStack.isEmpty()) {
             Command command = redoStack.pop();
@@ -75,19 +114,9 @@ public class GameEngine {
         }
     }
 
-    public void saveGame(String filename) throws IOException {
-        try (FileWriter writer = new FileWriter(filename)) {
-            // Serializacja stanu planszy
-            writer.write(board.toString());
-            System.out.println("Game saved to " + filename);
-        }
-    }
-
-    public void loadGame(String filename) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line = reader.readLine();
-            // Deserializacja stanu planszy (do późniejszego zaimplementowania)
-            System.out.println("Game loaded from " + filename);
-        }
+    // Zatrzymanie gry
+    public void stopGame() {
+        isRunning = false;
+        System.out.println("Game stopped.");
     }
 }

@@ -12,8 +12,8 @@ public class HumanPlayer extends Player {
     @Override
     public Coordinate getMove() {
         System.out.println("Enter your move (x y): ");
-        int x = scanner.nextInt();
-        int y = scanner.nextInt();
+        int x = scanner.nextInt() -1 ;
+        int y = scanner.nextInt() -1;
         return new Coordinate(x, y);
     }
 
