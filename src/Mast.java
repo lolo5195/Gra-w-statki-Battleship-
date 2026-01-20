@@ -35,4 +35,9 @@ public class Mast implements ShipComponent {
             hit();
         }
     }
+
+    @Override
+    public void repair() {
+        this.isHit = false;
+    }
 }

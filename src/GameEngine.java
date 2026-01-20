@@ -37,6 +37,10 @@ public class GameEngine {
 
     // Przygotowanie gry
     public void setupGame() {
+        // Czyszczenie stosów undo/redo przy rozpoczęciu nowej gry
+        undoStack.clear();
+        redoStack.clear();
+        
         // Budowanie plansz
         playerBoard = new BoardBuilder().addPlayerShips().build();
         botBoard = new BoardBuilder().addBotShips(5).build();
@@ -87,7 +91,7 @@ public class GameEngine {
         Command fire = new FireCommand(targetBoard, move);
         undoStack.push(fire); // dodanie do stosu undo
         fire.execute();        // wykonanie strzału
-        targetBoard.notifyObservers(); // powiadomienie obserwatorów (np. ConsoleView)
+        // notifyObservers wywoływane jest w shotAt() z odpowiednim FireResult
     }
 
     // Cofnięcie ostatniego ruchu

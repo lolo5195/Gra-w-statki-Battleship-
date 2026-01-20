@@ -11,8 +11,15 @@ public class BotPlayer extends Player {
 
     @Override
     public Coordinate getMove() {
-        int x = random.nextInt(enemyBoard.getGrid().length);
-        int y = random.nextInt(enemyBoard.getGrid()[0].length);
+        int x, y;
+        char cell;
+        // Losuj dopóki nie znajdziesz nieostrzelanego pola (nie X ani O)
+        do {
+            x = random.nextInt(enemyBoard.getGrid()[0].length);
+            y = random.nextInt(enemyBoard.getGrid().length);
+            cell = enemyBoard.getCell(new Coordinate(x, y));
+        } while (cell == 'X' || cell == 'O');
+        
         return new Coordinate(x, y);
     }
 

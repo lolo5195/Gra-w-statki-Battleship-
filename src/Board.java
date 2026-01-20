@@ -38,27 +38,46 @@ public class Board {
     }
 
     // Strzał w dane współrzędne
-public void shotAt(Coordinate coord) {
-    boolean hit = false;
+    public void shotAt(Coordinate coord) {
+        boolean hit = false;
+        FireResult result = FireResult.MISS;
+        ShipComponent hitShip = null;
 
-    for (ShipComponent ship : ships) {
-        if (ship.containsCoordinate(coord)) {
-            ship.registerHit(coord);
-            hit = true;
+        for (ShipComponent ship : ships) {
+            if (ship.containsCoordinate(coord)) {
+                ship.registerHit(coord);
+                hit = true;
+                hitShip = ship;
 
-            System.out.println(">>> Hit!");
-            if (ship.isSunk()) {
-                System.out.println(">>> Statek zatopiony!");
+                System.out.println(">>> Hit!");
+                if (ship.isSunk()) {
+                    System.out.println(">>> Statek zatopiony!");
+                    result = FireResult.HIT; // można dodać SUNK jeśli potrzebne
+                } else {
+                    result = FireResult.HIT;
+                }
+                break;
             }
-            break;
         }
+
+        grid[coord.getY()][coord.getX()] = hit ? 'X' : 'O';
+        if (!hit) {
+            System.out.println(">>> Miss!");
+            result = FireResult.MISS;
+        }
+
+        notifyObservers(result);
     }
 
-    grid[coord.getY()][coord.getX()] = hit ? 'X' : 'O';
-    if (!hit) System.out.println(">>> Miss!");
-
-    notifyObservers();
-}
+    // Pobranie statku na danej pozycji
+    public ShipComponent getShipAt(Coordinate coord) {
+        for (ShipComponent ship : ships) {
+            if (ship.containsCoordinate(coord)) {
+                return ship;
+            }
+        }
+        return null;
+    }
 
 
 
@@ -77,9 +96,9 @@ public void shotAt(Coordinate coord) {
         }
     }
 
-    public void notifyObservers() {
+    public void notifyObservers(FireResult result) {
         for (Observer observer : observers) {
-            observer.update(this);
+            observer.update(this, result);
         }
     }
 }

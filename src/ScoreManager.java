@@ -10,7 +10,12 @@ public class ScoreManager implements Observer {
         this.score=0;
     }
     @Override
-    public void update(Board board) {
+    public void update(Board board, FireResult result) {
+        if (result == FireResult.HIT) {
+            addhit();
+        } else if (result == FireResult.MISS) {
+            addmiss();
+        }
     }
     public void addhit(){
         this.score+=10;

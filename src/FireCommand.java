@@ -21,6 +21,11 @@ public class FireCommand implements Command {
     @Override
     public void undo() {
         board.setCell(coord, previousValue);
+        // Znajdź statek i napraw go
+        ShipComponent ship = board.getShipAt(coord);
+        if (ship != null && previousValue == 'S') {
+            ship.repair();
+        }
     }
 
     @Override

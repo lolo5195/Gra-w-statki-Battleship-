@@ -1,6 +1,6 @@
 public class ConsoleView implements Observer {
     @Override
-    public void update(Board board) {
+    public void update(Board board, FireResult result) {
         System.out.println("\n\n\n\n\n\n\n\n\n\n");
         System.out.println("========Current Board State:=======");
         char[][] grid = board.getGrid();

@@ -1,3 +1,3 @@
 public interface Observer {
-    void update(Board board);
+    void update(Board board, FireResult result);
 }

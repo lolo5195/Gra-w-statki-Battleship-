@@ -58,5 +58,15 @@ public class Warship implements ShipComponent {
         }
         return true;
     }
-    
+
+    @Override
+    public void repair() {
+        // Napraw wszystkie uszkodzone komponenty
+        for (ShipComponent comp : components) {
+            if (comp.isSunk()) {
+                comp.repair();
+                break; // napraw tylko ostatnio trafiony (uproszczenie)
+            }
+        }
+    }
 }
