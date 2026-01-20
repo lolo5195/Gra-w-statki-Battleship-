@@ -9,46 +9,65 @@ public class Main {
 
         while (running) {
             consoleView.displayWelcomeScreen();
-            System.out.print("Wybierz opcję: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            System.out.print("Wybierz opcje: ");
+            
+            int choice = -1;
+            try {
+                String input = scanner.nextLine();
+                choice = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Nieprawidlowy wybor! Wpisz liczbe.");
+                continue;
+            }
 
             switch (choice) {
-                case 1 -> { // Nowa gra
-                    System.out.print("Podaj swoją nazwę: ");
+                case 1 -> {
+                    System.out.print("Podaj swoja nazwe: ");
                     String nick = scanner.nextLine();
                     ScoreManager scoreManager = new ScoreManager(nick);
 
                     GameEngine engine = GameEngine.getInstance();
+                    engine.setPlayerName(nick);
                     engine.setupGame();
 
-                    engine.getPlayerBoard().attach(scoreManager); // żeby punkty były liczone
-                    engine.getBotBoard().attach(consoleView);     // drukujemy tylko planszę przeciwnika
-
-
-                    engine.getPlayerBoard().notifyObservers();
-                    engine.getBotBoard().notifyObservers();
+                    engine.getBotBoard().attach(scoreManager);
 
                     Player winner = engine.startGame();
+                    
+                    if(winner != null) {
+                        scoreManager.setPlayerWon(winner instanceof HumanPlayer);
+                        scoreManager.saveScore();
+                    }
                 }
-                case 2 -> displayRanking();
+                case 2 -> displayHistory();
                 case 3 -> {
                     System.out.println("Do widzenia!");
                     running = false;
                 }
-                default -> System.out.println("Nieprawidłowy wybór! Spróbuj ponownie.");
+                default -> System.out.println("Nieprawidlowy wybor! Sprobuj ponownie.");
             }
         }
     }
 
-    private static void displayRanking() {
+    private static void displayHistory() {
         try (BufferedReader reader = new BufferedReader(new FileReader("results.txt"))) {
-            System.out.println("\n===== Ranking =====");
+            System.out.println();
+            System.out.println("+============================================+");
+            System.out.println("|            HISTORIA GIER                  |");
+            System.out.println("+============================================+");
             String line;
-            while ((line = reader.readLine()) != null) System.out.println(line);
-            System.out.println("==================\n");
+            int count = 0;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("  " + line);
+                count++;
+            }
+            if (count == 0) {
+                System.out.println("  Brak zapisanych gier.");
+            }
+            System.out.println("+============================================+");
+            System.out.println();
         } catch (IOException e) {
-            System.out.println("Brak zapisanych wyników.");
+            System.out.println("Brak zapisanych gier.");
         }
     }
 }

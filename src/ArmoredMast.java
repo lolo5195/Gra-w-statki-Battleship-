@@ -15,4 +15,10 @@ public class ArmoredMast extends Mast {
             super.hit();
         }
     }
+
+    @Override
+    public void repair() {
+        hp = 2;
+        super.repair();
+    }
 }

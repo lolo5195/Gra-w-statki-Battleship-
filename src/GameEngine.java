@@ -9,25 +9,18 @@ public class GameEngine {
     private boolean isRunning;
     private Stack<Command> undoStack;
     private Stack<Command> redoStack;
+    private String playerName;
 
-    // Pobranie planszy gracza
-    public Board getPlayerBoard() {
-        return playerBoard;
-    }
-
-    // Pobranie planszy bota
     public Board getBotBoard() {
         return botBoard;
     }
 
-    // Konstruktor prywatny (singleton)
     private GameEngine() {
         undoStack = new Stack<>();
         redoStack = new Stack<>();
         isRunning = false;
     }
 
-    // Singleton
     public static GameEngine getInstance() {
         if (instance == null) {
             instance = new GameEngine();
@@ -35,88 +28,132 @@ public class GameEngine {
         return instance;
     }
 
-    // Przygotowanie gry
+    public void setPlayerName(String name) {
+        this.playerName = name;
+    }
+
     public void setupGame() {
-        // Budowanie plansz
+        undoStack.clear();
+        redoStack.clear();
+        isRunning = false;
+        
         playerBoard = new BoardBuilder().addPlayerShips().build();
         botBoard = new BoardBuilder().addBotShips(5).build();
 
-        // Tworzymy graczy
-        player1 = new HumanPlayer("Player1");
-        player2 = new BotPlayer(1);
+        player1 = new HumanPlayer(playerName != null ? playerName : "Player1");
+        player2 = new BotPlayer();
 
-        // Ustawienie planszy przeciwnika
         player1.setEnemyBoard(botBoard);
         player2.setEnemyBoard(playerBoard);
 
-        System.out.println("Game setup completed.");
+        System.out.println("[INFO] Przygotowanie gry zakonczone.");
     }
 
-    // Rozpoczęcie gry
     public Player startGame() {
-        System.out.println("\nGame started!");
+        System.out.println("\n[INFO] Gra rozpoczeta!");
         isRunning = true;
+        ConsoleView view = new ConsoleView();
+        
+        view.displayBothBoards(playerBoard, botBoard);
 
         while (!playerBoard.isGameOver() && !botBoard.isGameOver() && isRunning) {
-            processTurn(player1, botBoard);
+            processTurn(player1, botBoard, view);
             if (!botBoard.isGameOver() && isRunning) {
-                processTurn(player2, playerBoard);
+                processTurn(player2, playerBoard, view);
             }
         }
 
         isRunning = false;
 
         if (playerBoard.isGameOver()) {
-            System.out.println("Bot wins!");
+            System.out.println();
+            System.out.println("+===================================+");
+            System.out.println("|         KONIEC GRY!               |");
+            System.out.println("|         BOT WYGRYWA!              |");
+            System.out.println("+===================================+");
             return player2;
         } else if (botBoard.isGameOver()) {
-            System.out.println(player1.getName() + " wins!");
+            System.out.println();
+            System.out.println("+===================================+");
+            System.out.println("|         KONIEC GRY!               |");
+            System.out.println("|   " + String.format("%-20s", player1.getName()) + " WYGRYWA!  |");
+            System.out.println("+===================================+");
             return player1;
         } else {
-            System.out.println("Game stopped.");
+            System.out.println("[INFO] Gra zatrzymana.");
             return null;
         }
     }
 
-    // Wykonanie tury gracza
-    private void processTurn(Player player, Board targetBoard) {
-        System.out.println("\n" + player.getName() + "'s turn.");
+    private void processTurn(Player player, Board targetBoard, ConsoleView view) {
+        System.out.println();
+        System.out.println("--- Tura: " + player.getName() + " ---");
+        
+        if(player instanceof HumanPlayer) {
+            view.displayBothBoards(playerBoard, botBoard);
+        }
+        
         Coordinate move = player.getMove();
+        
+        if (player instanceof HumanPlayer) {
+            if (move.equals(HumanPlayer.UNDO_ACTION)) {
+                undoLastMove();
+                view.displayBothBoards(playerBoard, botBoard);
+                processTurn(player, targetBoard, view);
+                return;
+            }
+            if (move.equals(HumanPlayer.REDO_ACTION)) {
+                redoLastMove();
+                view.displayBothBoards(playerBoard, botBoard);
+                processTurn(player, targetBoard, view);
+                return;
+            }
+        }
 
-        // Utworzenie komendy FireCommand
         Command fire = new FireCommand(targetBoard, move);
-        undoStack.push(fire); // dodanie do stosu undo
-        fire.execute();        // wykonanie strzału
-        targetBoard.notifyObservers(); // powiadomienie obserwatorów (np. ConsoleView)
+        undoStack.push(fire);
+        redoStack.clear();
+        fire.execute();
+        
+        // Wyswietl plansze po ruchu
+        view.displayBothBoards(playerBoard, botBoard);
+        
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
-    // Cofnięcie ostatniego ruchu
     public void undoLastMove() {
-        if (!undoStack.isEmpty()) {
+        int movesToUndo = Math.min(2, undoStack.size());
+        
+        if (movesToUndo == 0) {
+            System.out.println("[INFO] Brak ruchow do cofniecia.");
+            return;
+        }
+        
+        for (int i = 0; i < movesToUndo; i++) {
             Command command = undoStack.pop();
             command.undo();
             redoStack.push(command);
-            System.out.println("Undo completed.");
-        } else {
-            System.out.println("No moves to undo.");
         }
+        System.out.println("[INFO] Cofnieto " + movesToUndo + " ruch(y).");
     }
 
-    // Powtórzenie cofniętego ruchu
     public void redoLastMove() {
-        if (!redoStack.isEmpty()) {
+        int movesToRedo = Math.min(2, redoStack.size());
+        
+        if (movesToRedo == 0) {
+            System.out.println("[INFO] Brak ruchow do powtorzenia.");
+            return;
+        }
+        
+        for (int i = 0; i < movesToRedo; i++) {
             Command command = redoStack.pop();
             command.redo();
             undoStack.push(command);
-            System.out.println("Redo completed.");
-        } else {
-            System.out.println("No moves to redo.");
         }
-    }
-
-    // Zatrzymanie gry
-    public void stopGame() {
-        isRunning = false;
-        System.out.println("Game stopped.");
+        System.out.println("[INFO] Powtorzono " + movesToRedo + " ruch(y).");
     }
 }

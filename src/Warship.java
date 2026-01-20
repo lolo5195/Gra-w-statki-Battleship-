@@ -6,11 +6,19 @@ public class Warship implements ShipComponent {
 
     public Warship() {
         this.components = new ArrayList<>();
-
     }
 
     public void addComponent(ShipComponent component) {
         this.components.add(component);
+    }
+    
+    public ShipComponent getComponentAt(Coordinate c) {
+        for (ShipComponent comp : components) {
+            if (comp.containsCoordinate(c)) {
+                return comp;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -58,5 +66,14 @@ public class Warship implements ShipComponent {
         }
         return true;
     }
-    
+
+    @Override
+    public void repair() {
+        for (ShipComponent comp : components) {
+            if (comp.isSunk()) {
+                comp.repair();
+                break;
+            }
+        }
+    }
 }
