@@ -6,11 +6,20 @@ public class Warship implements ShipComponent {
 
     public Warship() {
         this.components = new ArrayList<>();
-
     }
 
     public void addComponent(ShipComponent component) {
         this.components.add(component);
+    }
+    
+    // Pobranie komponentu na danej wspolrzednej
+    public ShipComponent getComponentAt(Coordinate c) {
+        for (ShipComponent comp : components) {
+            if (comp.containsCoordinate(c)) {
+                return comp;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -44,6 +53,7 @@ public class Warship implements ShipComponent {
 
     @Override
     public void hit() {
+        // Trafia wszystkie komponenty - uzywane przez interfejs ShipComponent
         for (ShipComponent comp : components) {
             comp.hit();
         }
