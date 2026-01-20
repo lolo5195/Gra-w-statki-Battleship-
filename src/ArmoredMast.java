@@ -18,7 +18,7 @@ public class ArmoredMast extends Mast {
 
     @Override
     public void repair() {
-        hp = 2; // Przywroc pelne HP
-        super.repair(); // przywroc isHit = false
+        hp = 2;
+        super.repair();
     }
 }

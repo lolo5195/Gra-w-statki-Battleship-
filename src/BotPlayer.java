@@ -11,10 +11,9 @@ public class BotPlayer extends Player {
     public Coordinate getMove() {
         int x, y;
         char cell;
-        int maxAttempts = 200; // Zabezpieczenie przed nieskonczona petla
+        int maxAttempts = 200;
         int attempts = 0;
         
-        // Losuj dopóki nie znajdziesz nieostrzelanego pola (nie X ani O)
         do {
             x = random.nextInt(enemyBoard.getGrid()[0].length);
             y = random.nextInt(enemyBoard.getGrid().length);
@@ -22,7 +21,6 @@ public class BotPlayer extends Player {
             attempts++;
             
             if (attempts >= maxAttempts) {
-                // Jesli za duzo prob, znajdz pierwsze wolne pole
                 for (int i = 0; i < 10; i++) {
                     for (int j = 0; j < 10; j++) {
                         char c = enemyBoard.getCell(new Coordinate(i, j));
@@ -31,7 +29,6 @@ public class BotPlayer extends Player {
                         }
                     }
                 }
-                // Jesli wszystko ostrzelane - zwroc jakiekolwiek pole
                 return new Coordinate(0, 0);
             }
         } while (cell == 'X' || cell == 'O');

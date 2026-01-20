@@ -11,19 +11,16 @@ public class GameEngine {
     private Stack<Command> redoStack;
     private String playerName;
 
-    // Pobranie planszy bota
     public Board getBotBoard() {
         return botBoard;
     }
 
-    // Konstruktor prywatny (singleton)
     private GameEngine() {
         undoStack = new Stack<>();
         redoStack = new Stack<>();
         isRunning = false;
     }
 
-    // Singleton
     public static GameEngine getInstance() {
         if (instance == null) {
             instance = new GameEngine();
@@ -31,40 +28,32 @@ public class GameEngine {
         return instance;
     }
 
-    // Ustawienie nazwy gracza
     public void setPlayerName(String name) {
         this.playerName = name;
     }
 
-    // Przygotowanie gry
     public void setupGame() {
-        // Czyszczenie stosow undo/redo przy rozpoczeciu nowej gry
         undoStack.clear();
         redoStack.clear();
         isRunning = false;
         
-        // Budowanie plansz
         playerBoard = new BoardBuilder().addPlayerShips().build();
         botBoard = new BoardBuilder().addBotShips(5).build();
 
-        // Tworzymy graczy
         player1 = new HumanPlayer(playerName != null ? playerName : "Player1");
         player2 = new BotPlayer();
 
-        // Ustawienie planszy przeciwnika
         player1.setEnemyBoard(botBoard);
         player2.setEnemyBoard(playerBoard);
 
         System.out.println("[INFO] Przygotowanie gry zakonczone.");
     }
 
-    // Rozpoczecie gry
     public Player startGame() {
         System.out.println("\n[INFO] Gra rozpoczeta!");
         isRunning = true;
         ConsoleView view = new ConsoleView();
         
-        // Wyswietl poczatkowy stan plansz
         view.displayBothBoards(playerBoard, botBoard);
 
         while (!playerBoard.isGameOver() && !botBoard.isGameOver() && isRunning) {
@@ -96,48 +85,39 @@ public class GameEngine {
         }
     }
 
-    // Wykonanie tury gracza
     private void processTurn(Player player, Board targetBoard, ConsoleView view) {
         System.out.println();
         System.out.println("--- Tura: " + player.getName() + " ---");
         
-        // Wyswietl plansze przed ruchem (tylko dla czlowieka)
         if(player instanceof HumanPlayer) {
             view.displayBothBoards(playerBoard, botBoard);
         }
         
         Coordinate move = player.getMove();
         
-        // Obsluga akcji specjalnych dla gracza ludzkiego
         if (player instanceof HumanPlayer) {
-            // Sprawdz czy to akcja undo
             if (move.equals(HumanPlayer.UNDO_ACTION)) {
                 undoLastMove();
                 view.displayBothBoards(playerBoard, botBoard);
-                // Rekurencyjnie poproś o nowy ruch
                 processTurn(player, targetBoard, view);
                 return;
             }
-            // Sprawdz czy to akcja redo
             if (move.equals(HumanPlayer.REDO_ACTION)) {
                 redoLastMove();
                 view.displayBothBoards(playerBoard, botBoard);
-                // Rekurencyjnie poproś o nowy ruch
                 processTurn(player, targetBoard, view);
                 return;
             }
         }
 
-        // Utworzenie komendy FireCommand
         Command fire = new FireCommand(targetBoard, move);
-        undoStack.push(fire); // dodanie do stosu undo
-        redoStack.clear();    // wyczyść stos redo po nowym ruchu
-        fire.execute();        // wykonanie strzalu
+        undoStack.push(fire);
+        redoStack.clear();
+        fire.execute();
         
         // Wyswietl plansze po ruchu
         view.displayBothBoards(playerBoard, botBoard);
         
-        // Krotka przerwa dla czytelnosci
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -145,9 +125,7 @@ public class GameEngine {
         }
     }
 
-    // Cofniecie ostatniego ruchu (cofa pare: ruch bota + ruch gracza)
     public void undoLastMove() {
-        // Cofamy 2 ruchy: ostatni ruch bota i poprzedni ruch gracza
         int movesToUndo = Math.min(2, undoStack.size());
         
         if (movesToUndo == 0) {
@@ -163,9 +141,7 @@ public class GameEngine {
         System.out.println("[INFO] Cofnieto " + movesToUndo + " ruch(y).");
     }
 
-    // Powtorzenie cofnietego ruchu (powtarza pare: ruch gracza + ruch bota)
     public void redoLastMove() {
-        // Powtarzamy 2 ruchy: ruch gracza i ruch bota
         int movesToRedo = Math.min(2, redoStack.size());
         
         if (movesToRedo == 0) {

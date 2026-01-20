@@ -4,7 +4,6 @@ public class HumanPlayer extends Player {
     private Scanner scanner;
     private String name;
     
-    // Specjalne współrzędne dla akcji
     public static final Coordinate UNDO_ACTION = new Coordinate(-1, -1);
     public static final Coordinate REDO_ACTION = new Coordinate(-2, -2);
 
@@ -19,7 +18,6 @@ public class HumanPlayer extends Player {
             System.out.print("Podaj wspolrzedne [kolumna wiersz] (1-10) lub [u]ndo/[r]edo: ");
             String input = scanner.nextLine().trim().toLowerCase();
             
-            // Sprawdzenie komend specjalnych
             if (input.equals("u") || input.equals("undo")) {
                 return UNDO_ACTION;
             }
@@ -27,7 +25,6 @@ public class HumanPlayer extends Player {
                 return REDO_ACTION;
             }
             
-            // Parsowanie współrzędnych
             try {
                 String[] parts = input.split("\\s+");
                 if (parts.length != 2) {
@@ -35,23 +32,21 @@ public class HumanPlayer extends Player {
                     continue;
                 }
                 
-                int col = Integer.parseInt(parts[0]) - 1;    // X = kolumna - pierwsza liczba
-                int row = Integer.parseInt(parts[1]) - 1;    // Y = wiersz - druga liczba
+                int col = Integer.parseInt(parts[0]) - 1;
+                int row = Integer.parseInt(parts[1]) - 1;
                 
-                // Walidacja wspolrzednych
                 if (row < 0 || row >= 10 || col < 0 || col >= 10) {
                     System.out.println("[BLAD] Nieprawidlowe wspolrzedne! Podaj liczby od 1 do 10.");
                     continue;
                 }
             
-                // Sprawdzenie czy pole juz bylo strzelane
                 char cell = enemyBoard.getCell(new Coordinate(col, row));
                 if (cell == 'X' || cell == 'O') {
                     System.out.println("[BLAD] To pole bylo juz strzelane! Wybierz inne wspolrzedne.");
                     continue;
                 }
             
-                return new Coordinate(col, row);  // X = kolumna, Y = wiersz
+                return new Coordinate(col, row);
             } catch (NumberFormatException e) {
                 System.out.println("[BLAD] Nieprawidlowe dane! Podaj dwie liczby od 1 do 10.");
             }

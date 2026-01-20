@@ -21,21 +21,19 @@ public class Main {
             }
 
             switch (choice) {
-                case 1 -> { // Nowa gra
+                case 1 -> {
                     System.out.print("Podaj swoja nazwe: ");
                     String nick = scanner.nextLine();
                     ScoreManager scoreManager = new ScoreManager(nick);
 
                     GameEngine engine = GameEngine.getInstance();
-                    engine.setPlayerName(nick);  // Ustaw nazwe gracza
+                    engine.setPlayerName(nick);
                     engine.setupGame();
 
-                    // ScoreManager podpinamy do planszy BOTA - gracz zdobywa punkty za trafianie bota
                     engine.getBotBoard().attach(scoreManager);
 
                     Player winner = engine.startGame();
                     
-                    // Zapis wynikow po zakonczeniu gry
                     if(winner != null) {
                         scoreManager.setPlayerWon(winner instanceof HumanPlayer);
                         scoreManager.saveScore();

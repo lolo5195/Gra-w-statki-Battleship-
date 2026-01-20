@@ -29,7 +29,6 @@ public class ScoreManager implements Observer {
     
     @Override
     public void onUndo(Board board, FireResult originalResult) {
-        // Cofnij punkty - odwrotnosc oryginalnej akcji
         if (originalResult == FireResult.HIT) {
             this.score -= 10;
             System.out.println("[UNDO] -10 za cofniecie trafienia. Wynik: " + this.score);

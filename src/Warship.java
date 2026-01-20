@@ -12,7 +12,6 @@ public class Warship implements ShipComponent {
         this.components.add(component);
     }
     
-    // Pobranie komponentu na danej wspolrzednej
     public ShipComponent getComponentAt(Coordinate c) {
         for (ShipComponent comp : components) {
             if (comp.containsCoordinate(c)) {
@@ -53,7 +52,6 @@ public class Warship implements ShipComponent {
 
     @Override
     public void hit() {
-        // Trafia wszystkie komponenty - uzywane przez interfejs ShipComponent
         for (ShipComponent comp : components) {
             comp.hit();
         }
@@ -71,11 +69,10 @@ public class Warship implements ShipComponent {
 
     @Override
     public void repair() {
-        // Napraw wszystkie uszkodzone komponenty
         for (ShipComponent comp : components) {
             if (comp.isSunk()) {
                 comp.repair();
-                break; // napraw tylko ostatnio trafiony (uproszczenie)
+                break;
             }
         }
     }

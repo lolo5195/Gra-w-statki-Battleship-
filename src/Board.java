@@ -8,38 +8,32 @@ public class Board {
     public Board() {
         grid = new char[10][10];
         for (int i = 0; i < 10; i++) {
-            Arrays.fill(grid[i], '~'); // '~' = woda
+            Arrays.fill(grid[i], '~');
         }
         ships = new ArrayList<>();
         observers = new ArrayList<>();
     }
 
-    // Pobranie planszy
     public char[][] getGrid() {
         return grid;
     }
 
-    // Pobranie zawartosci konkretnego pola
     public char getCell(Coordinate c) {
-        return grid[c.getY()][c.getX()]; // Y = wiersz, X = kolumna
+        return grid[c.getY()][c.getX()];
     }
 
-    // Ustawienie wartosci pola (np. 'X', 'O', 'S')
     public void setCell(Coordinate c, char value) {
-        grid[c.getY()][c.getX()] = value; // Y = wiersz, X = kolumna
+        grid[c.getY()][c.getX()] = value;
     }
 
-    // Umieszczenie statku na planszy
     public void placeShip(ShipComponent ship) {
         ships.add(ship);
         for (Coordinate c : ship.getCoordinates()) {
-            grid[c.getY()][c.getX()] = 'S'; // Y = wiersz, X = kolumna
+            grid[c.getY()][c.getX()] = 'S';
         }
     }
 
-    // Strzal w dane wspolrzedne
     public void shotAt(Coordinate coord) {
-        // Sprawdzenie czy pole juz bylo strzelane
         char currentCell = grid[coord.getY()][coord.getX()];
         if (currentCell == 'X' || currentCell == 'O') {
             System.out.println("[BLAD] To pole bylo juz strzelane! Wybierz inne wspolrzedne.");
@@ -56,18 +50,14 @@ public class Board {
                 hit = true;
                 hitShip = ship;
 
-                // Sprawdz czy komponent na tej wspolrzednej jest zatopiony (wazne dla ArmoredMast)
                 ShipComponent component = getComponentAt(ship, coord);
                 boolean componentSunk = (component != null && component.isSunk());
 
                 if (componentSunk) {
                     System.out.println("[TRAFIENIE] Trafiono w statek!");
-                    // Oznacz pole jako trafione tylko gdy komponent jest zatopiony
                     grid[coord.getY()][coord.getX()] = 'X';
                 } else {
-                    // Opancerzony maszt - trafiony ale nie zatopiony
                     System.out.println("[TRAFIENIE] Trafiono opancerzony maszt! (wymaga jeszcze 1 trafienia)");
-                    // Pole pozostaje jako 'S' - statek wciaz widoczny
                 }
                 
                 if (ship.isSunk()) {
@@ -92,20 +82,16 @@ public class Board {
         notifyObservers(result);
     }
     
-    // Pomocnicza metoda do pobrania konkretnego komponentu na danej wspolrzednej
     private ShipComponent getComponentAt(ShipComponent ship, Coordinate coord) {
         if (ship instanceof Warship warship) {
-            // Dla Warship pobieramy konkretny komponent
             ShipComponent component = warship.getComponentAt(coord);
             if (component != null) {
                 return component;
             }
         }
-        // Dla Mast/ArmoredMast - zwroc sam statek
         return ship;
     }
 
-    // Pobranie statku na danej pozycji
     public ShipComponent getShipAt(Coordinate coord) {
         for (ShipComponent ship : ships) {
             if (ship.containsCoordinate(coord)) {
@@ -115,7 +101,6 @@ public class Board {
         return null;
     }
 
-    // Sprawdzenie, czy wszystkie statki zostaly zatopione
     public boolean isGameOver() {
         for (ShipComponent ship : ships) {
             if (!ship.isSunk()) return false;
@@ -123,7 +108,6 @@ public class Board {
         return true;
     }
     
-    // Pobranie nazwy typu statku na podstawie rozmiaru
     private String getShipTypeName(int size) {
         return switch (size) {
             case 1 -> "Jednomasztowiec";
@@ -134,7 +118,6 @@ public class Board {
         };
     }
 
-    // Obsluga obserwatorow (np. ConsoleView)
     public void attach(Observer observer) {
         if (observer != null && !observers.contains(observer)) {
             observers.add(observer);
@@ -147,7 +130,6 @@ public class Board {
         }
     }
     
-    // Powiadomienie obserwatorow o cofnieciu ruchu (odwrotne punkty)
     public void notifyObserversUndo(FireResult originalResult) {
         for (Observer observer : observers) {
             observer.onUndo(this, originalResult);
