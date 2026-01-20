@@ -84,8 +84,5 @@ java -cp src Main
 - Java 17 lub nowsza
 - Brak zewnętrznych bibliotek
 
-## Autorzy
-Projekt stworzony zgodnie ze specyfikacją UML dla kursu Zaawansowane Techniki Programowania.
-
 ## Licencja
 Projekt edukacyjny
