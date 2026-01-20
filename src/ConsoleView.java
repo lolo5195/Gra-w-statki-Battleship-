@@ -47,7 +47,7 @@ public class ConsoleView {
         System.out.println("|     GRA W STATKI - BATTLESHIP     |");
         System.out.println("+===================================+");
         System.out.println("|  1 - Nowa gra                     |");
-        System.out.println("|  2 - Ranking                      |");
+        System.out.println("|  2 - Historia gier                |");
         System.out.println("|  3 - Wyjscie                      |");
         System.out.println("+===================================+");
     }

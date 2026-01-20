@@ -145,27 +145,39 @@ public class GameEngine {
         }
     }
 
-    // Cofniecie ostatniego ruchu
+    // Cofniecie ostatniego ruchu (cofa pare: ruch bota + ruch gracza)
     public void undoLastMove() {
-        if (!undoStack.isEmpty()) {
+        // Cofamy 2 ruchy: ostatni ruch bota i poprzedni ruch gracza
+        int movesToUndo = Math.min(2, undoStack.size());
+        
+        if (movesToUndo == 0) {
+            System.out.println("[INFO] Brak ruchow do cofniecia.");
+            return;
+        }
+        
+        for (int i = 0; i < movesToUndo; i++) {
             Command command = undoStack.pop();
             command.undo();
             redoStack.push(command);
-            System.out.println("[INFO] Cofnieto ostatni ruch.");
-        } else {
-            System.out.println("[INFO] Brak ruchow do cofniecia.");
         }
+        System.out.println("[INFO] Cofnieto " + movesToUndo + " ruch(y).");
     }
 
-    // Powtorzenie cofnietego ruchu
+    // Powtorzenie cofnietego ruchu (powtarza pare: ruch gracza + ruch bota)
     public void redoLastMove() {
-        if (!redoStack.isEmpty()) {
+        // Powtarzamy 2 ruchy: ruch gracza i ruch bota
+        int movesToRedo = Math.min(2, redoStack.size());
+        
+        if (movesToRedo == 0) {
+            System.out.println("[INFO] Brak ruchow do powtorzenia.");
+            return;
+        }
+        
+        for (int i = 0; i < movesToRedo; i++) {
             Command command = redoStack.pop();
             command.redo();
             undoStack.push(command);
-            System.out.println("[INFO] Powtorzono cofniety ruch.");
-        } else {
-            System.out.println("[INFO] Brak ruchow do powtorzenia.");
         }
+        System.out.println("[INFO] Powtorzono " + movesToRedo + " ruch(y).");
     }
 }

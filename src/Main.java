@@ -37,10 +37,11 @@ public class Main {
                     
                     // Zapis wynikow po zakonczeniu gry
                     if(winner != null) {
+                        scoreManager.setPlayerWon(winner instanceof HumanPlayer);
                         scoreManager.saveScore();
                     }
                 }
-                case 2 -> displayRanking();
+                case 2 -> displayHistory();
                 case 3 -> {
                     System.out.println("Do widzenia!");
                     running = false;
@@ -50,14 +51,25 @@ public class Main {
         }
     }
 
-    private static void displayRanking() {
+    private static void displayHistory() {
         try (BufferedReader reader = new BufferedReader(new FileReader("results.txt"))) {
-            System.out.println("\n===== Ranking =====");
+            System.out.println();
+            System.out.println("+============================================+");
+            System.out.println("|            HISTORIA GIER                  |");
+            System.out.println("+============================================+");
             String line;
-            while ((line = reader.readLine()) != null) System.out.println(line);
-            System.out.println("==================\n");
+            int count = 0;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("  " + line);
+                count++;
+            }
+            if (count == 0) {
+                System.out.println("  Brak zapisanych gier.");
+            }
+            System.out.println("+============================================+");
+            System.out.println();
         } catch (IOException e) {
-            System.out.println("Brak zapisanych wynikow.");
+            System.out.println("Brak zapisanych gier.");
         }
     }
 }
