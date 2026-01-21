@@ -359,12 +359,11 @@ try (FileWriter fw = new FileWriter(FILE, true);
 
 | Osoba | Zakres prac |
 |-------|-------------|
-| **Osoba 1** | Implementacja wzorca **Singleton** (`GameEngine.java`), główna pętla gry, integracja komponentów, klasa `Main.java` z menu głównym i historią gier |
-| **Osoba 2** | Implementacja wzorca **Composite** (`ShipComponent.java`, `Mast.java`, `ArmoredMast.java`, `Warship.java`), model statków, logika trafień i zatopień |
-| **Osoba 3** | Implementacja wzorca **Command** (`Command.java`, `FireCommand.java`), mechanizm undo/redo, integracja ze stosami w `GameEngine` |
-| **Osoba 4** | Implementacja wzorca **Observer** (`Observer.java`, `ScoreManager.java`), system punktacji, zapis wyników do pliku, powiadomienia o zdarzeniach |
-| **Osoba 5** | Implementacja wzorca **Builder** (`BoardBuilder.java`), algorytm losowego rozmieszczania statków, walidacja pozycji, klasa `Board.java` |
-| **Osoba 6** | Implementacja interfejsu użytkownika (`ConsoleView.java`), klasy graczy (`Player.java`, `HumanPlayer.java`, `BotPlayer.java`), parsowanie wejścia, obsługa błędów |
+| **Gabriel Kossakowski** | Implementacja wzorca **Singleton** (`GameEngine.java`), główna pętla gry, integracja komponentów, klasa `Main.java` z menu głównym i historią gier, klasy graczy (`Player.java`, `HumanPlayer.java`, `BotPlayer.java`) |
+| **Mateusz Żmiejko** | Implementacja wzorca **Composite** (`ShipComponent.java`, `Mast.java`, `ArmoredMast.java`, `Warship.java`), model statków, logika trafień i zatopień |
+| **Igor Wróblewski** | Implementacja wzorca **Command** (`Command.java`, `FireCommand.java`), mechanizm undo/redo, integracja ze stosami w `GameEngine` |
+| **Bartosz Mroziewski** | Implementacja wzorca **Observer** (`Observer.java`, `ScoreManager.java`, `ConsoleView.java`), system punktacji, zapis wyników do pliku, powiadomienia o zdarzeniach, interfejs użytkownika |
+| **Jakub Piotrowski** | Implementacja wzorca **Builder** (`BoardBuilder.java`), algorytm losowego rozmieszczania statków, walidacja pozycji, klasa `Board.java` |
 | **Wspólnie** | Klasy pomocnicze (`Coordinate.java`, `FireResult.java`), testowanie, dokumentacja, code review |
 
 ---
