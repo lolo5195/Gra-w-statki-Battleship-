@@ -362,7 +362,7 @@ try (FileWriter fw = new FileWriter(FILE, true);
 | **Gabriel Kossakowski** | Implementacja wzorca **Singleton** (`GameEngine.java`), główna pętla gry, integracja komponentów, klasa `Main.java` z menu głównym i historią gier, klasy graczy (`Player.java`, `HumanPlayer.java`, `BotPlayer.java`) |
 | **Mateusz Żmiejko** | Implementacja wzorca **Composite** (`ShipComponent.java`, `Mast.java`, `ArmoredMast.java`, `Warship.java`), model statków, logika trafień i zatopień |
 | **Igor Wróblewski** | Implementacja wzorca **Command** (`Command.java`, `FireCommand.java`), mechanizm undo/redo, integracja ze stosami w `GameEngine` |
-| **Bartosz Mroziewski** | no w sumie to nic xddd |
+| **Bartosz Mroziewski** | Implementacja wzorca **Observer** (`Observer.java`, `ScoreManager.java`, `ConsoleView.java`), system punktacji, zapis wyników do pliku, powiadomienia o zdarzeniach, interfejs użytkownika |
 | **Jakub Piotrowski** | Implementacja wzorca **Builder** (`BoardBuilder.java`), algorytm losowego rozmieszczania statków, walidacja pozycji, klasa `Board.java` |
 | **Wspólnie** | Klasy pomocnicze (`Coordinate.java`, `FireResult.java`), testowanie, dokumentacja, code review |
 
