@@ -1,24 +1,29 @@
-# Gra w Statki (Battleship) - Dokumentacja Projektu
+# Battleship: design patterns in Java
 
-## Spis treści
-1. [Opis projektu](#opis-projektu)
-2. [Diagramy klas wzorców projektowych](#diagramy-klas-wzorców-projektowych)
-3. [Szczegółowy opis wzorców](#szczegółowy-opis-wzorców)
-4. [Rozwiązania specyficzne dla języka Java](#rozwiązania-specyficzne-dla-języka-java)
-5. [Podział pracy w zespole](#podział-pracy-w-zespole)
-6. [Instrukcja użytkownika](#instrukcja-użytkownika)
-7. [Instrukcja instalacji](#instrukcja-instalacji)
+Console Battleship game written in pure Java around five design patterns: **Singleton**, **Composite**, **Command**, **Observer** and **Builder**. Team project (5 people) for a software design course. The in-game text is in Polish.
 
----
-
-## Opis projektu
-Konsolowa gra w statki (Battleship) zaimplementowana w czystej Javie z wykorzystaniem pięciu wzorców projektowych: **Singleton**, **Composite**, **Command**, **Observer** oraz **Builder**.
+## Contents
+1. [Features](#features)
+2. [Class diagrams](#class-diagrams)
+3. [Design patterns in detail](#design-patterns-in-detail)
+4. [Java-specific solutions](#java-specific-solutions)
+5. [Team and responsibilities](#team-and-responsibilities)
+6. [How to play](#how-to-play)
+7. [Build and run](#build-and-run)
 
 ---
 
-## Diagramy klas wzorców projektowych
+## Features
+- Player vs bot on a 10×10 board, fleets placed randomly
+- **Undo / redo** of moves (Command pattern)
+- Armored masts that need two hits to sink
+- Scoring and game history saved to a file
 
-### Diagram 1: Wzorzec Singleton (GameEngine)
+---
+
+## Class diagrams
+
+### Diagram 1: Singleton (GameEngine)
 
 ```
 ┌─────────────────────────────────────┐
@@ -40,7 +45,7 @@ Konsolowa gra w statki (Battleship) zaimplementowana w czystej Javie z wykorzyst
 └─────────────────────────────────────┘
 ```
 
-### Diagram 2: Wzorzec Composite (Hierarchia statków)
+### Diagram 2: Composite (ship hierarchy)
 
 ```
               ┌───────────────────────┐
@@ -74,7 +79,7 @@ Konsolowa gra w statki (Battleship) zaimplementowana w czystej Javie z wykorzyst
                            └───── extends ────┘
 ```
 
-### Diagram 3: Wzorzec Command (Strzały z Undo/Redo)
+### Diagram 3: Command (shots with undo/redo)
 
 ```
 ┌───────────────────────┐         ┌────────────────────────┐
@@ -103,7 +108,7 @@ Konsolowa gra w statki (Battleship) zaimplementowana w czystej Javie z wykorzyst
 └───────────────────────┘
 ```
 
-### Diagram 4: Wzorzec Observer (Powiadomienia o stanie gry)
+### Diagram 4: Observer (game state notifications)
 
 ```
 ┌───────────────────────┐              ┌────────────────────────┐
@@ -120,7 +125,7 @@ Konsolowa gra w statki (Battleship) zaimplementowana w czystej Javie z wykorzyst
                                        │                        │
                            ┌───────────▼────────┐   ┌───────────▼────────┐
                            │    ScoreManager    │   │     ConsoleView    │
-                           │ (ConcreteObserver) │   │  (potencjalny obs) │
+                           │ (ConcreteObserver) │   │ (potential observ.)│
                            ├────────────────────┤   ├────────────────────┤
                            │ - nick: String     │   │ + displayBothBoards│
                            │ - score: int       │   │ + displayWelcome   │
@@ -131,7 +136,7 @@ Konsolowa gra w statki (Battleship) zaimplementowana w czystej Javie z wykorzyst
                            └────────────────────┘
 ```
 
-### Diagram 5: Wzorzec Builder (Budowanie planszy)
+### Diagram 5: Builder (board construction)
 
 ```
 ┌─────────────────────────────────────────┐
@@ -163,215 +168,210 @@ Konsolowa gra w statki (Battleship) zaimplementowana w czystej Javie z wykorzyst
 
 ---
 
-## Szczegółowy opis wzorców
+## Design patterns in detail
 
-### 1. Wzorzec Singleton
+### 1. Singleton
 
-**Cel użycia:**  
-Zapewnienie, że w całej aplikacji istnieje tylko jedna instancja silnika gry (`GameEngine`), która zarządza stanem rozgrywki, planszami graczy oraz stosami operacji undo/redo. Singleton eliminuje problemy z wieloma instancjami silnika, które mogłyby prowadzić do niespójności stanu gry.
+**Purpose:**  
+Guarantees there is exactly one game engine (`GameEngine`) managing the game state, both boards and the undo/redo stacks. This prevents several engine instances from getting out of sync.
 
-**Przyporządkowanie klas do ról wzorca:**
-| Rola | Klasa |
+**Roles:**
+| Role | Class |
 |------|-------|
 | Singleton | `GameEngine` |
 
-**Lokalizacja w kodzie:**
-- **Definicja:** `src/GameEngine.java`, linie 3-27 (prywatny konstruktor, statyczne pole `instance`, metoda `getInstance()`)
-- **Użycie:** `src/Main.java`, linia 28 (`GameEngine.getInstance()`)
+**Where in the code:**
+- **Definition:** `src/GameEngine.java`, lines 3–27 (private constructor, static `instance` field, `getInstance()`)
+- **Usage:** `src/Main.java`, line 28 (`GameEngine.getInstance()`)
 
-**Wektor zmian:**  
-Dzięki Singletonowi można w przyszłości łatwo dodać nowe funkcjonalności do silnika gry (np. tryb multiplayer, zapis/odczyt stanu gry) bez ryzyka tworzenia wielu niezsynchronizowanych instancji. Możliwe rozszerzenia:
-- Dodanie zapisu stanu gry do pliku
-- Implementacja trybu sieciowego z jednym centralnym silnikiem
-- Rozbudowa systemu statystyk
-
----
-
-### 2. Wzorzec Composite
-
-**Cel użycia:**  
-Umożliwienie jednolitego traktowania pojedynczych masztów (`Mast`, `ArmoredMast`) oraz całych statków złożonych z wielu masztów (`Warship`). Dzięki temu plansza może operować na kolekcji `ShipComponent` bez rozróżniania czy jest to pojedynczy maszt czy złożony statek.
-
-**Przyporządkowanie klas do ról wzorca:**
-| Rola | Klasa |
-|------|-------|
-| Component (interfejs) | `ShipComponent` |
-| Leaf (liść) | `Mast`, `ArmoredMast` |
-| Composite (kompozyt) | `Warship` |
-
-**Lokalizacja w kodzie:**
-- **Definicja komponentu:** `src/ShipComponent.java`, linie 1-12
-- **Definicja liścia Mast:** `src/Mast.java`, linie 1-40
-- **Definicja liścia ArmoredMast:** `src/ArmoredMast.java`, linie 1-22
-- **Definicja kompozytu:** `src/Warship.java`, linie 1-72
-- **Użycie:** `src/BoardBuilder.java`, linie 91-102 (tworzenie statków), `src/Board.java`, linie 43-77 (operacje na statkach)
-
-**Wektor zmian:**  
-Wzorzec umożliwia łatwe dodawanie nowych typów masztów lub statków:
-- Nowe typy masztów (np. `ShieldedMast`, `ExplosiveMast`)
-- Statki o specjalnych właściwościach (np. podwodne z niewidzialnością)
-- Formacje statków (grupy statków działające jako jeden element)
+**Possible extensions:**  
+New engine features can be added without the risk of multiple unsynchronized instances, e.g.:
+- saving the game state to a file
+- a network mode with one central engine
+- extended statistics
 
 ---
 
-### 3. Wzorzec Command
+### 2. Composite
 
-**Cel użycia:**  
-Enkapsulacja operacji strzału jako obiektu, co umożliwia implementację funkcjonalności cofania (undo) i ponawiania (redo) ruchów. Każdy strzał jest zapisywany jako komenda ze stanem przed i po wykonaniu, co pozwala na pełną odwracalność akcji.
+**Purpose:**  
+Treats single masts (`Mast`, `ArmoredMast`) and whole ships made of several masts (`Warship`) the same way. The board works on a collection of `ShipComponent` objects without checking whether something is a single mast or a full ship.
 
-**Przyporządkowanie klas do ról wzorca:**
-| Rola | Klasa |
+**Roles:**
+| Role | Class |
 |------|-------|
-| Command (interfejs) | `Command` |
+| Component (interface) | `ShipComponent` |
+| Leaf | `Mast`, `ArmoredMast` |
+| Composite | `Warship` |
+
+**Where in the code:**
+- **Component:** `src/ShipComponent.java`, lines 1–12
+- **Leaf `Mast`:** `src/Mast.java`, lines 1–40
+- **Leaf `ArmoredMast`:** `src/ArmoredMast.java`, lines 1–22
+- **Composite:** `src/Warship.java`, lines 1–72
+- **Usage:** `src/BoardBuilder.java`, lines 91–102 (creating ships), `src/Board.java`, lines 43–77 (operations on ships)
+
+**Possible extensions:**
+- new mast types (e.g. `ShieldedMast`, `ExplosiveMast`)
+- ships with special abilities (e.g. an invisible submarine)
+- formations: groups of ships acting as one element
+
+---
+
+### 3. Command
+
+**Purpose:**  
+Each shot is wrapped in an object that stores the cell state before and after the shot, which makes every move fully reversible (undo / redo).
+
+**Roles:**
+| Role | Class |
+|------|-------|
+| Command (interface) | `Command` |
 | ConcreteCommand | `FireCommand` |
-| Invoker | `GameEngine` (stosy undo/redo) |
+| Invoker | `GameEngine` (undo/redo stacks) |
 | Receiver | `Board` |
 | Client | `GameEngine.processTurn()` |
 
-**Lokalizacja w kodzie:**
-- **Definicja interfejsu:** `src/Command.java`, linie 1-5
-- **Definicja komendy:** `src/FireCommand.java`, linie 1-53
-- **Invoker (stosy):** `src/GameEngine.java`, linie 10-11, 118-145
-- **Użycie:** `src/GameEngine.java`, linie 103-107 (tworzenie i wykonywanie komend)
+**Where in the code:**
+- **Interface:** `src/Command.java`, lines 1–5
+- **Command:** `src/FireCommand.java`, lines 1–53
+- **Invoker (stacks):** `src/GameEngine.java`, lines 10–11, 118–145
+- **Usage:** `src/GameEngine.java`, lines 103–107 (creating and executing commands)
 
-**Wektor zmian:**  
-Możliwość dodawania nowych typów komend:
-- `RepairCommand` - naprawa uszkodzonego statku
-- `MoveCommand` - przesunięcie statku (wariant gry)
-- `SpecialAttackCommand` - atak specjalny obejmujący wiele pól
-- `SaveGameCommand` - zapis stanu gry jako komenda
+**Possible extensions:**
+- `RepairCommand`: repair a damaged ship
+- `MoveCommand`: move a ship (game variant)
+- `SpecialAttackCommand`: an attack covering several cells
+- `SaveGameCommand`: saving the game as a command
 
 ---
 
-### 4. Wzorzec Observer
+### 4. Observer
 
-**Cel użycia:**  
-Automatyczne powiadamianie komponentów (np. `ScoreManager`) o zdarzeniach podczas gry (trafienia, pudła). Dzięki temu komponenty mogą reagować na zmiany stanu planszy bez ścisłego powiązania z logiką gry.
+**Purpose:**  
+Notifies components such as `ScoreManager` about game events (hits, misses), so they react to board changes without being coupled to the game logic.
 
-**Przyporządkowanie klas do ról wzorca:**
-| Rola | Klasa |
+**Roles:**
+| Role | Class |
 |------|-------|
 | Subject | `Board` |
-| Observer (interfejs) | `Observer` |
+| Observer (interface) | `Observer` |
 | ConcreteObserver | `ScoreManager` |
 
-**Lokalizacja w kodzie:**
-- **Definicja interfejsu:** `src/Observer.java`, linie 1-6
-- **Subject (attach, notify):** `src/Board.java`, linie 110-124
-- **ConcreteObserver:** `src/ScoreManager.java`, linie 1-61
-- **Rejestracja obserwatora:** `src/Main.java`, linia 33 (`engine.getBotBoard().attach(scoreManager)`)
-- **Powiadamianie:** `src/Board.java`, linia 79, `src/FireCommand.java`, linie 38, 50
+**Where in the code:**
+- **Interface:** `src/Observer.java`, lines 1–6
+- **Subject (attach, notify):** `src/Board.java`, lines 110–124
+- **ConcreteObserver:** `src/ScoreManager.java`, lines 1–61
+- **Registration:** `src/Main.java`, line 33 (`engine.getBotBoard().attach(scoreManager)`)
+- **Notification:** `src/Board.java`, line 79, `src/FireCommand.java`, lines 38, 50
 
-**Wektor zmian:**  
-Możliwość dodawania nowych obserwatorów:
-- `SoundManager` - odtwarzanie dźwięków przy trafieniach
-- `AchievementManager` - system osiągnięć
-- `StatisticsCollector` - zbieranie szczegółowych statystyk
-- `NetworkNotifier` - powiadamianie o zdarzeniach w trybie sieciowym
+**Possible extensions:**
+- `SoundManager`: sounds on hits
+- `AchievementManager`: achievements
+- `StatisticsCollector`: detailed statistics
+- `NetworkNotifier`: events in a network mode
 
 ---
 
-### 5. Wzorzec Builder
+### 5. Builder
 
-**Cel użycia:**  
-Stopniowe budowanie złożonego obiektu planszy (`Board`) z losowo rozmieszczonymi statkami. Builder oddziela proces konstrukcji planszy od jej reprezentacji, umożliwiając różne konfiguracje (plansza gracza vs plansza bota).
+**Purpose:**  
+Builds the complex `Board` object step by step, with randomly placed ships. Construction is separated from the board itself, so the player's and the bot's boards can be configured differently.
 
-**Przyporządkowanie klas do ról wzorca:**
-| Rola | Klasa |
+**Roles:**
+| Role | Class |
 |------|-------|
 | Builder | `BoardBuilder` |
 | Product | `Board` |
-| Director | `GameEngine` (wywołuje metody buildera) |
+| Director | `GameEngine` (calls the builder methods) |
 
-**Lokalizacja w kodzie:**
-- **Definicja Buildera:** `src/BoardBuilder.java`, linie 1-122
+**Where in the code:**
+- **Builder:** `src/BoardBuilder.java`, lines 1–122
 - **Product:** `src/Board.java`
-- **Użycie (Director):** `src/GameEngine.java`, linie 38-39
+- **Usage (Director):** `src/GameEngine.java`, lines 38–39
 
-**Wektor zmian:**  
-Możliwości rozbudowy:
-- `addPlayerShipsManually()` - ręczne rozmieszczanie statków przez gracza
-- `addShipsFromFile(path)` - wczytywanie układu z pliku
-- `addCustomFleet(config)` - niestandardowa flota
-- Różne rozmiary planszy (np. 15x15)
+**Possible extensions:**
+- `addPlayerShipsManually()`: manual ship placement
+- `addShipsFromFile(path)`: loading a layout from a file
+- `addCustomFleet(config)`: a custom fleet
+- different board sizes (e.g. 15×15)
 
 ---
 
-## Rozwiązania specyficzne dla języka Java
+## Java-specific solutions
 
-### 1. Interfejsy z metodami domyślnymi (Java 8+)
-Interfejs `Observer` wykorzystuje metodę domyślną `onUndo()`:
+### 1. Default interface methods (Java 8+)
+`Observer` has a default `onUndo()`, so concrete observers implement it only when they need it:
 ```java
 default void onUndo(Board board, FireResult originalResult) {
-    // Domyślna pusta implementacja
+    // empty by default
 }
 ```
-Pozwala to na opcjonalne implementowanie metody przez konkretne obserwatory.
 
-### 2. Pattern Matching dla instanceof (Java 16+)
-W klasie `Board` używany jest pattern matching:
+### 2. Pattern matching for instanceof (Java 16+)
+Used in `Board`:
 ```java
 if (ship instanceof Warship warship) {
     ShipComponent component = warship.getComponentAt(coord);
 }
 ```
 
-### 3. Switch Expressions (Java 14+)
-W klasie `Main` i `Board` używane są wyrażenia switch:
+### 3. Switch expressions (Java 14+)
+Used in `Main` and `Board`:
 ```java
 switch (choice) {
-    case 1 -> { /* kod */ }
+    case 1 -> { /* code */ }
     case 2 -> displayHistory();
     case 3 -> { running = false; }
 }
 ```
 
-### 4. Fluent Interface w Builderze
-`BoardBuilder` zwraca `this` w metodach budujących, umożliwiając łańcuchowe wywołania:
+### 4. Fluent interface in the Builder
+`BoardBuilder` methods return `this`, so calls can be chained:
 ```java
 new BoardBuilder().addPlayerShips().build();
 ```
 
-### 5. Enum dla wyników strzału
-`FireResult` jako enum zapewnia type-safety i czytelność:
+### 5. Enum for shot results
+`FireResult` keeps results type-safe and readable:
 ```java
 public enum FireResult { EMPTY, HIT, MISS }
 ```
 
-### 6. Kolekcje generyczne i List.of() (Java 9+)
-Niemodyfikowalne listy w klasie `Mast`:
+### 6. Generic collections and List.of() (Java 9+)
+Immutable lists in `Mast`:
 ```java
 return List.of(this.coordinate);
 ```
 
 ### 7. Try-with-resources
-Automatyczne zamykanie zasobów plikowych:
+File resources are closed automatically:
 ```java
 try (FileWriter fw = new FileWriter(FILE, true);
      PrintWriter out = new PrintWriter(fw)) {
-    // operacje na pliku
+    // file operations
 }
 ```
 
 ---
 
-## Podział pracy w zespole
+## Team and responsibilities
 
-| Osoba | Zakres prac |
-|-------|-------------|
-| **Gabriel Kossakowski** | Implementacja wzorca **Singleton** (`GameEngine.java`),  klasy graczy (`Player.java`, `HumanPlayer.java`, `BotPlayer.java`) |
-| **Mateusz Żmiejko** | Implementacja wzorca **Composite** (`ShipComponent.java`, `Mast.java`, `ArmoredMast.java`, `Warship.java`), model statków, logika trafień i zatopień |
-| **Igor Wróblewski** | Implementacja wzorca **Command** (`Command.java`, `FireCommand.java`), mechanizm undo/redo, integracja ze stosami w `GameEngine` |
-| **Bartosz Mroziewski** | Implementacja wzorca **Observer** (`Observer.java`, `ScoreManager.java`, `ConsoleView.java`), system punktacji, zapis wyników do pliku, powiadomienia o zdarzeniach, interfejs użytkownika |
-| **Jakub Piotrowski** | Implementacja wzorca **Builder** (`BoardBuilder.java`), algorytm losowego rozmieszczania statków, walidacja pozycji, klasa `Board.java` |
-| **Wspólnie** | Klasy pomocnicze (`Coordinate.java`, `FireResult.java`), główna pętla gry, integracja komponentów, klasa `Main.java` z menu głównym i historią gier, testowanie, dokumentacja, code review |
+| Person | Responsibilities |
+|--------|------------------|
+| **Gabriel Kossakowski** | **Singleton** (`GameEngine.java`), player classes (`Player.java`, `HumanPlayer.java`, `BotPlayer.java`) |
+| **Mateusz Żmiejko** | **Composite** (`ShipComponent.java`, `Mast.java`, `ArmoredMast.java`, `Warship.java`), ship model, hit and sink logic |
+| **Igor Wróblewski** | **Command** (`Command.java`, `FireCommand.java`), undo/redo, integration with the stacks in `GameEngine` |
+| **Bartosz Mroziewski** | **Observer** (`Observer.java`, `ScoreManager.java`, `ConsoleView.java`), scoring, saving results to a file, event notifications, user interface |
+| **Jakub Piotrowski** | **Builder** (`BoardBuilder.java`), random ship placement, position validation, `Board.java` |
+| **Together** | Helper classes (`Coordinate.java`, `FireResult.java`), main game loop, integration, `Main.java` with the main menu and game history, testing, documentation, code review |
 
 ---
 
-## Instrukcja użytkownika
+## How to play
 
-### Menu główne
-Po uruchomieniu gry wyświetla się menu z trzema opcjami:
+### Main menu
+After start, the game shows a menu (in Polish): **1** new game, **2** game history, **3** exit.
 ```
 +===================================+
 |     GRA W STATKI - BATTLESHIP     |
@@ -382,12 +382,13 @@ Po uruchomieniu gry wyświetla się menu z trzema opcjami:
 +===================================+
 ```
 
-### Rozpoczęcie gry (opcja 1)
-1. Podaj swoją nazwę gracza
-2. Statki zostają automatycznie rozmieszczone na obu planszach
-3. Gra rozpoczyna się - grasz przeciwko botowi
+### Starting a game (option 1)
+1. Enter your player name
+2. Ships are placed automatically on both boards
+3. The game starts: you play against a bot
 
-### Interfejs planszy
+### Board view
+Your board on the left, the opponent's on the right. Legend: `~` water, `S` ship, `X` hit, `O` miss.
 ```
         TWOJA PLANSZA                  PLANSZA PRZECIWNIKA
    +---------------------+           +---------------------+
@@ -396,80 +397,73 @@ Po uruchomieniu gry wyświetla się menu z trzema opcjami:
    ...                                ...
    +---------------------+           +---------------------+
      1 2 3 4 5 6 7 8 9 10              1 2 3 4 5 6 7 8 9 10
-
-Legenda:  ~ Woda  |  S Statek  |  X Trafienie  |  O Pudło
 ```
 
-### Wykonywanie ruchu
-- Podaj współrzędne w formacie: `kolumna wiersz` (np. `5 3`)
-- Wartości od 1 do 10 dla obu współrzędnych
+### Making a move
+- Enter coordinates as `column row` (e.g. `5 3`)
+- Both values range from 1 to 10
 
-### Cofanie i ponawianie ruchów
-- Wpisz `u` lub `undo` - cofa ostatni ruch (twój i bota)
-- Wpisz `r` lub `redo` - ponawia cofnięty ruch
+### Undo and redo
+- `u` or `undo`: undoes the last move (yours and the bot's)
+- `r` or `redo`: redoes an undone move
 
-### System punktacji
-- **+10 punktów** za każde trafienie
-- **-1 punkt** za każde pudło
-- Wynik zapisywany po zakończeniu gry
+### Scoring
+- **+10 points** for every hit
+- **−1 point** for every miss
+- The score is saved when the game ends
 
-### Flota (dla każdego gracza)
-| Typ statku | Ilość | Rozmiar | Uwagi |
-|------------|-------|---------|-------|
-| Czteromasztowiec | 1 | 4 pola | - |
-| Trójmasztowiec | 2 | 3 pola | - |
-| Dwumasztowiec | 3 | 2 pola | - |
-| Jednomasztowiec | 4 | 1 pole | 2 z pancerzem |
+### Fleet (per player)
+| Ship | Count | Size | Notes |
+|------|-------|------|-------|
+| Four-master | 1 | 4 cells | – |
+| Three-master | 2 | 3 cells | – |
+| Two-master | 3 | 2 cells | – |
+| One-master | 4 | 1 cell | 2 of them armored |
 
-**Opancerzony maszt** wymaga 2 trafień do zniszczenia.
+An **armored mast** needs 2 hits to be destroyed.
 
-### Historia gier (opcja 2)
-Wyświetla zapisane wyniki w formacie:
+### Game history (option 2)
+Shows saved results:
 ```
 2025-01-21 14:30 | Gracz123 | 85 pkt | WYGRANA
 ```
 
 ---
 
-## Instrukcja instalacji
+## Build and run
 
-### Wymagania
-- **Java JDK 17** lub nowsza
-- Terminal/konsola
+### Requirements
+- **Java JDK 17** or newer
 
-### Kompilacja
+### Compile and run
 ```bash
 cd src
 javac *.java
-```
-
-### Uruchomienie
-```bash
 java Main
 ```
 
-### Struktura plików
+### Project structure
 ```
 src/
-├── Main.java           # Punkt wejścia
-├── GameEngine.java     # Singleton - silnik gry
-├── Board.java          # Plansza (Subject w Observer)
-├── BoardBuilder.java   # Builder planszy
-├── ShipComponent.java  # Interfejs Composite
+├── Main.java           # entry point
+├── GameEngine.java     # Singleton: game engine
+├── Board.java          # board (Subject in Observer)
+├── BoardBuilder.java   # board Builder
+├── ShipComponent.java  # Composite interface
 ├── Warship.java        # Composite
 ├── Mast.java           # Leaf
-├── ArmoredMast.java    # Leaf z HP
-├── Command.java        # Interfejs Command
+├── ArmoredMast.java    # Leaf with HP
+├── Command.java        # Command interface
 ├── FireCommand.java    # Concrete Command
-├── Observer.java       # Interfejs Observer
+├── Observer.java       # Observer interface
 ├── ScoreManager.java   # Concrete Observer
-├── ConsoleView.java    # Widok konsolowy
-├── Player.java         # Abstrakcyjna klasa gracza
-├── HumanPlayer.java    # Gracz ludzki
-├── BotPlayer.java      # Gracz komputerowy
-├── Coordinate.java     # Współrzędne
-└── FireResult.java     # Enum wyników strzału
+├── ConsoleView.java    # console view
+├── Player.java         # abstract player
+├── HumanPlayer.java    # human player
+├── BotPlayer.java      # computer player
+├── Coordinate.java     # coordinates
+└── FireResult.java     # shot result enum
 ```
 
-### Plik wyników
-Wyniki zapisywane są automatycznie do pliku `results.txt` w katalogu uruchomienia.
+### Results file
+Results are saved automatically to `results.txt` in the working directory.
